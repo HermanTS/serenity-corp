@@ -302,15 +302,27 @@ NK_API union nkc_event nkc_poll_events(struct nkc* nkcHandle){
     } else {
         nkcHandle->needs_refresh = 0;
     }
-    while ( PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)){
+
+    if(GetMessage(&msg,NULL,0,0)) {
+		if(IsDialogMessage(GetParent(msg.hwnd),&msg));
+		else {
+			switch(msg.message){
+				case WM_KEYDOWN:
+					ne.type = NKC_EKEY;
+					ne.key.code = msg.wParam;
+				break;
+				}
+			nkcHandle->needs_refresh = 1;
+		}
+		TranslateMessage(&msg);
+		DispatchMessage(&msg);
+	}
+
+    if ( PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)){
         switch(msg.message){
             case WM_QUIT:
                 ne.type = NKC_EWINDOW;
                 ne.window.param = NKC_EQUIT;
-            break;
-            case WM_KEYDOWN:
-                ne.type = NKC_EKEY;
-                ne.key.code = msg.wParam;
             break;
         }
         TranslateMessage(&msg);

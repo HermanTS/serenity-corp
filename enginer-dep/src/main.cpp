@@ -31,7 +31,7 @@ int main(int argc, char **argv) {
 	printf("%s console start user interface\n", MY_NAME);
     MainWindow Window;
     Window.start();
-    std::thread Twindow(Window.execute, Window);
+    std::thread Twindow(MainWindow::execute, Window);
     Twindow.join();
 	printf("%s console disable\n", MY_NAME);
 
