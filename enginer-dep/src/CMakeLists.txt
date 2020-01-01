@@ -15,7 +15,7 @@ set (CMAKE_CXX_FLAGS  "-O0  -Wall -std=c++11")
 set (SOURCES
     main.cpp
     main-window.cpp
-    #keyboard-capture.c
+    window-widget.cpp
    )
 
 set (COMMON_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../common-lib/)

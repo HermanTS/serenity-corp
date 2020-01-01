@@ -8,7 +8,11 @@
 #ifndef MAIN_WINDOW_H_
 #define MAIN_WINDOW_H_
 
+#include <list>
+#include <iterator>
+
 #include "nuklear_cross.h"
+#include "window-widget.h"
 
 using namespace std;
 
@@ -16,6 +20,7 @@ class MainWindow {
 
 public:
     MainWindow(void);
+    MainWindow(list <WindowWidget*>* ListWidgets);
     void start(void);
     void stop(void);
     void execute(void);
@@ -29,6 +34,9 @@ private:
     int hight;
     int widht;
     enum nkc_window_mode window_mode;
+
+    list <WindowWidget*>* ListWidgets;
+
 };
 
 

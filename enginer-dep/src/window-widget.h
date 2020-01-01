@@ -15,8 +15,23 @@ using namespace std;
 class WindowWidget{
 public:
 	WindowWidget(void);
+	WindowWidget(char* title, int x, int y, int w, int h, nk_flags flags);
 
-private:
+	void Draw(nk_context *ctx);
+protected:
+	virtual void CustomDraw(nk_context *ctx) {return;};
+
+	const char* title;
+	int x_pos;
+	int y_pos;
+	int widght;
+	int hight;
+	nk_flags flags;
+};
+
+
+class TestWidget:public WindowWidget{
+	void CustomDraw(nk_context *ctx);
 };
 
 

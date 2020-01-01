@@ -15,6 +15,7 @@
 
 #include "enginer-dep.h"
 #include "main-window.h"
+#include "window-widget.h"
 
 using namespace std;
 
@@ -25,11 +26,15 @@ int main(int argc, char **argv) {
 
 	printf("%s console ready\n", MY_NAME);
 
-//	pthread_t key_capture_ph_Id;
-//	pthread_create(&key_capture_ph_Id, NULL, th_keyboard_capture, NULL);
-
 	printf("%s console start user interface\n", MY_NAME);
-    MainWindow Window;
+
+	TestWidget testWidget;
+
+	list <WindowWidget*> ListWidgets;
+	ListWidgets.push_back(&testWidget);
+
+    MainWindow Window(&ListWidgets);
+
     Window.start();
     std::thread Twindow(MainWindow::execute, Window);
     Twindow.join();
