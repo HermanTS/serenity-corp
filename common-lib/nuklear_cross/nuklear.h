@@ -15535,7 +15535,7 @@ nk_do_edit(nk_flags *state, struct nk_command_buffer *out,
         /* enter key handler */
         if (nk_input_is_key_pressed(in, NK_KEY_ENTER)) {
             cursor_follow = nk_true;
-            if (flags & NK_EDIT_CTRL_ENTER_NEWLINE && shift_mod)
+            if ((flags & NK_EDIT_CTRL_ENTER_NEWLINE) && shift_mod)
                 nk_textedit_text(edit, "\n", 1);
             else if (flags & NK_EDIT_SIG_ENTER)
                 ret |= NK_EDIT_COMMITED;
@@ -19342,7 +19342,7 @@ nk_layout_row_end(struct nk_context *ctx)
 
     win = ctx->current;
     layout = win->layout;
-    NK_ASSERT(layout->row.type == NK_LAYOUT_STATIC_ROW || layout->row.type == NK_LAYOUT_DYNAMIC_ROW);
+//    NK_ASSERT(layout->row.type == NK_LAYOUT_STATIC_ROW || layout->row.type == NK_LAYOUT_DYNAMIC_ROW);
     if (layout->row.type != NK_LAYOUT_STATIC_ROW && layout->row.type != NK_LAYOUT_DYNAMIC_ROW)
         return;
     layout->row.item_width = 0;

@@ -291,9 +291,13 @@ NK_API union nkc_event nkc_poll_events(struct nkc* nkcHandle){
     /* Input */
     nk_input_begin(ctx);
     if (nkcHandle->needs_refresh == 0){
-        if (GetMessageW(&msg, NULL, 0, 0) <= 0){
-            ne.type = NKC_EWINDOW;
-            ne.window.param = NKC_EQUIT;
+        if (PeekMessageW(&msg, NULL, 0, 0, PM_NOREMOVE)){
+            switch(msg.message){
+                case WM_QUIT:
+                    ne.type = NKC_EWINDOW;
+                    ne.window.param = NKC_EQUIT;
+                break;
+            }
         } else {
             TranslateMessage(&msg);
             DispatchMessageW(&msg);
@@ -303,10 +307,14 @@ NK_API union nkc_event nkc_poll_events(struct nkc* nkcHandle){
         nkcHandle->needs_refresh = 0;
     }
 
-    if(GetMessage(&msg,NULL,0,0)) {
+    if(PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)) {
 		if(IsDialogMessage(GetParent(msg.hwnd),&msg));
 		else {
 			switch(msg.message){
+				case WM_QUIT:
+					ne.type = NKC_EWINDOW;
+					ne.window.param = NKC_EQUIT;
+				break;
 				case WM_KEYDOWN:
 					ne.type = NKC_EKEY;
 					ne.key.code = msg.wParam;
@@ -318,17 +326,6 @@ NK_API union nkc_event nkc_poll_events(struct nkc* nkcHandle){
 		DispatchMessage(&msg);
 	}
 
-    if ( PeekMessageW(&msg, NULL, 0, 0, PM_REMOVE)){
-        switch(msg.message){
-            case WM_QUIT:
-                ne.type = NKC_EWINDOW;
-                ne.window.param = NKC_EQUIT;
-            break;
-        }
-        TranslateMessage(&msg);
-        DispatchMessageW(&msg);
-        nkcHandle->needs_refresh = 1;
-    }
     nk_input_end(ctx);
     return ne;
 }

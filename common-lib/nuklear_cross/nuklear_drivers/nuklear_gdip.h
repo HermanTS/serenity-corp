@@ -48,6 +48,20 @@ NK_API void nk_gdip_image_free(struct nk_image image);
 #include <stdlib.h>
 #include <malloc.h>
 
+/* autor gstsvetkov
+   This is crutch for the correct entry of the cyryllic symbols
+ */
+void nkg_prepare_unicode(WPARAM* unicode)
+{
+    nk_rune result = *unicode;
+
+    //Delete extra zero bytes from cyryllic unicode symbol
+    if (result & 0xff0000)
+        result = ((result & 0xff0000) >> 8)|(result & 0x0000ff);
+
+    *unicode = result;
+}
+
 /* manually declare everything GDI+ needs, because
    GDI+ headers are not usable from C */
 #define WINGDIPAPI __stdcall
@@ -583,12 +597,16 @@ nk_gdip_draw_text(short x, short y, unsigned short w, unsigned short h,
 #if __cplusplus < 201103L
     wstr = (WCHAR*)alloca(wsize * sizeof(wchar_t));
 #else
-    wstr = (WCHAR*)valloc(wsize * sizeof(wchar_t));
+    wstr = new WCHAR[wsize * sizeof(wchar_t)];
 #endif
     MultiByteToWideChar(CP_UTF8, 0, text, len, wstr, wsize);
 
     GdipSetSolidFillColor(gdip.brush, convert_color(cfg));
     GdipDrawString(gdip.memory, wstr, wsize, font->handle, &layout, gdip.format, gdip.brush);
+
+#if __cplusplus >= 201103L
+    delete[] wstr;
+#endif
 }
 
 static void
@@ -683,7 +701,7 @@ nk_gdipfont_create(const char *name, int size)
 #if __cplusplus < 201103L
     WCHAR* wname = (WCHAR*)alloca((wsize + 1) * sizeof(wchar_t));
 #else
-    WCHAR* wname = (WCHAR*)valloc((wsize + 1) * sizeof(wchar_t));
+    WCHAR* wname = new WCHAR[wsize * sizeof(wchar_t)];
 #endif
     MultiByteToWideChar(CP_UTF8, 0, name, -1, wname, wsize);
     wname[wsize] = 0;
@@ -692,6 +710,9 @@ nk_gdipfont_create(const char *name, int size)
     GdipCreateFont(family, (REAL)size, FontStyleRegular, UnitPixel, &font->handle);
     GdipDeleteFontFamily(family);
 
+#if __cplusplus >= 201103L
+    delete[] wname;
+#endif
     return font;
 }
 
@@ -745,11 +766,15 @@ nk_gdipfont_get_text_width(nk_handle handle, float height, const char *text, int
 #if __cplusplus < 201103L
     wstr = (WCHAR*)alloca(wsize * sizeof(wchar_t));
 #else
-    wstr = (WCHAR*)valloc(wsize * sizeof(wchar_t));
+    wstr = new WCHAR[wsize * sizeof(wchar_t)];
 #endif
     MultiByteToWideChar(CP_UTF8, 0, text, len, wstr, wsize);
 
     GdipMeasureString(gdip.memory, wstr, wsize, font->handle, &layout, gdip.format, &bbox, NULL, NULL);
+
+#if __cplusplus >= 201103L
+    delete[] wstr;
+#endif
     return bbox.Width;
 }
 
@@ -1024,6 +1049,9 @@ nk_gdip_handle_event(HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam)
     case WM_CHAR:
         if (wparam >= 32)
         {
+            UINT code_page = GetOEMCP();
+            if (code_page == 866) //Russian OEM
+                nkg_prepare_unicode(&wparam);
             nk_input_unicode(&gdip.ctx, (nk_rune)wparam);
             return 1;
         }
