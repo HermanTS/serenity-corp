@@ -1,0 +1,66 @@
+cmake_minimum_required (VERSION 3.6)
+
+project (medical-dep LANGUAGES CXX)
+
+
+
+
+if(CMAKE_BUILD_TYPE MATCHES .*DEBUG*)
+     set(TOOLS_PREFIX )
+else()
+     #set(TOOLS_PREFIX "x86_64-w64-mingw32-")
+endif()
+
+
+set(CMAKE_C_COMPILER "${TOOLS_PREFIX}gcc")
+set(CMAKE_CXX_COMPILER "${TOOLS_PREFIX}g++")
+set(CMAKE_LINKER "${TOOLS_PREFIX}ld")
+set(CMAKE_OBJCOPY "${TOOLS_PREFIX}objcopy")
+
+if(DEFINED CMAKE_ECLIPSE_VERSION)
+    execute_process(
+            COMMAND echo
+            COMMAND bash -c "g++ -E -Wp,-v - 2>&1"
+            COMMAND awk "/^#include .* starts here:$/,/^End of search list/ { if ($0 ~ /^ /) { print } }"
+        OUTPUT_VARIABLE SYS_INCLUDES_OUT)
+    message(INFO " Sys includes OUT - " ${SYS_INCLUDES_OUT})
+   separate_arguments(${SYS_INCLUDES_OUT}) # create a list
+    include_directories(${SYS_INCLUDES_OUT} ) # add list to includes
+    
+    message(INFO " Sys includes - " ${SYS_INCLUDES_OUT})
+endif()
+                                               
+set (CXX_STANDART 11)
+set (CXX_STANDART_REQUIRED YES)
+set (CXX_EXTENSIONS NO)
+
+if(CMAKE_BUILD_TYPE MATCHES .*RELEASE*)
+     set(CMAKE_CXX_FLAGS "-O0 -Wall -std=c++11 -fext-numeric-literals")# -static")
+else()
+     set(CMAKE_CXX_FLAGS "-O0 -std=c++11 -fext-numeric-literals")
+endif()
+
+set (COMMON_LIB_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../common-lib/)
+
+set (SOURCES
+
+    ${COMMON_LIB_PATH}/common/main-window.cpp
+    ${COMMON_LIB_PATH}/common/window-widget.cpp
+
+    main.cpp
+    NoteWidget.cpp
+   )
+
+include_directories(
+    ${COMMON_LIB_PATH}/nuklear_cross
+    ${COMMON_LIB_PATH}/common
+    ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+add_definitions(
+    -DNKCD=NKC_GDIP
+    )
+
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+target_link_libraries( ${PROJECT_NAME} gdiplus shlwapi ole32)
