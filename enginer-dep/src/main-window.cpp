@@ -6,19 +6,24 @@
  */
 
 #include <cstdlib>
-#include "main-window.h"
+#include <cstdint>
+#include <iostream>
+#include <list>
+#include <thread>
 #include "nuklear_cross.h"
 
+#include "main-window.h"
 #include "window-widget.h"
 
-MainWindow::MainWindow(void):  context(NULL), title("Engeneer department"),
+MainWindow::MainWindow(void):  context(nullptr), title("Engeneer department"),
                         hight(320),widht(640),window_mode(NKC_WIN_NORMAL)
 {
     ListWidgets = new list <WindowWidget*>;
 }
 
-MainWindow::MainWindow(list <WindowWidget*>* ListWidgets):  context(NULL), title("Engeneer department"),
-                        hight(320),widht(640),window_mode(NKC_WIN_NORMAL), ListWidgets(ListWidgets)
+MainWindow::MainWindow(list <WindowWidget*>* ListWidgets , uint32_t hight, uint32_t widht, enum nkc_window_mode mode ):
+                        context(NULL), title("Engeneer department"),
+                        hight(hight),widht(widht), window_mode(mode), ListWidgets(ListWidgets)
 {
 }
 
@@ -35,10 +40,10 @@ void MainWindow::stop(void)
 
 void MainWindow::execute(void)
 {
-    if (context == NULL)
+    if (context == nullptr)
         context = nkc_init( &nkcHandle, title, widht, hight, window_mode);
 
-    while (nkcHandle.keepRunning && (context != NULL))
+    while (nkcHandle.keepRunning && (context != nullptr))
     {
         drawWindow();
         eventHandler();
@@ -48,26 +53,29 @@ void MainWindow::execute(void)
 
 void MainWindow::drawWindow(void)
 {
-    nkc_render_bg(&nkcHandle, nk_rgb(40,40,40) );
     /* Nuklear GUI code */
-
     std::list<WindowWidget*>::iterator ItWidgets;
     for (ItWidgets = ListWidgets->begin(); ItWidgets != ListWidgets->end(); ++ItWidgets)
-        (*ItWidgets)->Draw(context);
+        (*ItWidgets)->Draw(&nkcHandle);
 
-    nkc_render_gui(&nkcHandle);
+    struct nk_color background = nk_rgb(40,40,40);
+    nkc_render(&nkcHandle, background);
     /* End Nuklear GUI */
 }
 
 void MainWindow::eventHandler(void)
 {
     union nkc_event e = nkc_poll_events(&nkcHandle);
-    if( (e.type == NKC_EWINDOW) && (e.window.param == NKC_EQUIT) )
+    switch (e.type){
+    case NKC_EWINDOW:
+    case NKC_EQUIT:
         stop();
-
-    if( (e.type == NKC_EKEY) )
-    {
-        printf("%c key pressed\n", nkc_get_key_char(e.key.code));
+        break;
+    case NKC_EKEY:
+        std::cout << nkc_get_key_char(e.key.code) << " key pressed" << std::endl;
+        break;
+    default:
+        break;
     }
 }
 

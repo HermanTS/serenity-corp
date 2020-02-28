@@ -1,25 +1,25 @@
 /*
  * window-widget.h
  *
- *  Created on: 29 дек. 2019 г.
- *      Author: Геман
+ *  Created on: 29 пїЅпїЅпїЅ. 2019 пїЅ.
+ *      Author: пїЅпїЅпїЅпїЅпїЅ
  */
 
 #ifndef WINDOW_WIDGET_H_
 #define WINDOW_WIDGET_H_
 
 #include "nuklear_cross.h"
-
-using namespace std;
+#include "stb_image.h"
 
 class WindowWidget{
 public:
 	WindowWidget(void);
+	WindowWidget(char* title);
 	WindowWidget(char* title, int x, int y, int w, int h, nk_flags flags);
-
-	void Draw(nk_context *ctx);
+    virtual ~WindowWidget(void){};
+	void Draw(struct nkc* nkcHandle);
 protected:
-	virtual void CustomDraw(nk_context *ctx) {return;};
+	virtual void CustomDraw(struct nkc* nkcHandle){};
 
 	const char* title;
 	int x_pos;
@@ -27,11 +27,12 @@ protected:
 	int widght;
 	int hight;
 	nk_flags flags;
+	struct nk_context* context;
 };
 
 
 class TestWidget:public WindowWidget{
-	void CustomDraw(nk_context *ctx);
+	void CustomDraw(struct nkc* nkcHandle);
 };
 
 

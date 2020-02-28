@@ -10,6 +10,7 @@
 
 #include <list>
 #include <iterator>
+#include <cstdint>
 
 #include "nuklear_cross.h"
 #include "window-widget.h"
@@ -20,7 +21,7 @@ class MainWindow {
 
 public:
     MainWindow(void);
-    MainWindow(list <WindowWidget*>* ListWidgets);
+    MainWindow(list <WindowWidget*>* ListWidgets , uint32_t hight, uint32_t widht, enum nkc_window_mode mode );
     void start(void);
     void stop(void);
     void execute(void);
